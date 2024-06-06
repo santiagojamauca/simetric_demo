@@ -1,20 +1,80 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Environment Setup Guide
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This guide outlines the steps to set up an AWS backend for Terraform, including the creation of an S3 bucket for state storage and a DynamoDB table for state locking. Also included is a brief overview of how to run Terraform to create the necessary infrastructure.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Part 1: Preparing AWS Resources with a Bash Script
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+### Overview
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+A Bash script is provided to automate the creation of the necessary AWS resources for the Terraform backend. This includes:
+
+- An S3 bucket for storing the Terraform state files.
+- A DynamoDB table for state locking to prevent concurrent execution conflicts.
+- *NOTE*: You only need to run this once to create the S3 bucket and DynamoDB table for the Terraform backend.
+
+### Prerequisites
+
+- AWS CLI installed and configured with the necessary permissions.
+
+### Running the Script
+
+1. Ensure the script `setup_terraform_backend.sh` is executable:
+
+   ```bash
+   chmod +x setup_terraform_backend.sh
+   ```
+
+2. Run the script with your desired AWS region and environment name as the argument:
+
+  ```bash
+  ./setup_terraform_backend.sh us-east-1 dev
+  ```
+
+## Part 2: Running Terraform
+
+### Overview
+
+The file structure is as follows:
+
+```
+├── dev
+├── modules
+│   ├── eks
+│   └── vpc
+└── prod
+```
+
+* `dev` and `prod` are the environments
+- `modules` contains the reusable modules for the infrastructure
+
+Each environment directory contains the Terraform configuration files for the respective environment. The `modules` directory contains the reusable modules for the infrastructure.  This is so we can reuse the same modules across different environments, or include only one module in an environment.
+
+### Prerequisites
+
+- Terraform installed on your local machine.
+
+### Running Terraform
+
+1. Navigate to one of the environment direcotires:
+
+   ```bash
+   cd dev
+   ```
+
+2. Initialize the Terraform working directory:
+
+   ```bash
+    terraform init
+    ```
+
+3. Create an execution plan:
+
+    ```bash
+    terraform plan -out=plan.out
+    ```
+
+4. Apply the changes:
+
+    ```bash
+    terraform apply plan.out
+    ```
